@@ -19,44 +19,40 @@ package org.apache.hugegraph.computer.algorithm.community.scan;
 
 import java.io.IOException;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.hugegraph.computer.core.common.ComputerContext;
+import org.apache.hugegraph.computer.core.graph.GraphFactory;
 import org.apache.hugegraph.computer.core.graph.id.Id;
+import org.apache.hugegraph.computer.core.graph.id.IdFactory;
 import org.apache.hugegraph.computer.core.graph.value.IdSet;
-import org.apache.hugegraph.computer.core.graph.value.Value;
 import org.apache.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class ScanValue implements CustomizeValue<Object> {
+public class ScanMessage implements CustomizeValue<ScanMessage> {
 
+    private final GraphFactory graphFactory;
+
+    private Id senderId;
     private IdSet neighbors;
-    private IdSet eps_neighbors;
     private int cluster;
 
-    public ScanValue() {
-        this.neighbors = new IdSet();
-        this.eps_neighbors = new IdSet();
-        this.cluster = 0;
+    public ScanMessage() {
+        this(IdFactory.createId(), new IdSet(), 0);
     }
 
-    public void neighbors(IdSet neighbors) {
+    public ScanMessage(Id senderId, IdSet neighbors, int cluster) {
+        this.graphFactory = ComputerContext.instance().graphFactory();
+        this.senderId = senderId;
         this.neighbors = neighbors;
+        this.cluster = cluster;
+    }
+
+    public Id senderId() {
+        return this.senderId;
     }
 
     public IdSet neighbors() {
         return this.neighbors;
-    }
-
-    public void epsNbAdd(Id nb) {
-        this.eps_neighbors.add(nb);
-    }
-
-    public IdSet epsNeighbors() {
-        return this.eps_neighbors;
-    }
-
-    public void cluster(int cluster) {
-        this.cluster = cluster;
     }
 
     public int cluster() {
@@ -64,37 +60,18 @@ public class ScanValue implements CustomizeValue<Object> {
     }
 
     @Override
-    public Value copy() {
-        ScanValue scanValue = new ScanValue();
-        scanValue.neighbors = this.neighbors.copy();
-        scanValue.eps_neighbors = this.eps_neighbors.copy();
-        scanValue.cluster = this.cluster;
-        return scanValue;
+    public void write(RandomAccessOutput out) throws IOException {
+        this.senderId.write(out);
     }
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
-        this.neighbors.read(in);
-        this.eps_neighbors.read(in);
-        this.cluster = in.readInt();
+        this.senderId = this.graphFactory.createId();
+        this.senderId.read(in);
     }
 
     @Override
-    public void write(RandomAccessOutput out) throws IOException {
-        this.neighbors.write(out);
-        this.eps_neighbors.write(out);
-        out.writeInt(this.cluster);
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("cluster", this.cluster)
-                .toString();
-    }
-
-    @Override
-    public Object value() {
-        return this.cluster;
+    public ScanMessage value() {
+        throw new UnsupportedOperationException();
     }
 }

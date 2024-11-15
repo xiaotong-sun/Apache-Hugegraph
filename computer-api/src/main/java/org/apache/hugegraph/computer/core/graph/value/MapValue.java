@@ -53,15 +53,15 @@ public class MapValue<T extends Value> implements Value {
 
     public void put(Id id, T value) {
         E.checkArgument(id != null, "Can't add null key to %s",
-                        this.valueType().string());
+                this.valueType().string());
         E.checkArgument(value != null, "Can't add null value to %s",
-                        this.valueType().string());
+                this.valueType().string());
         if (this.elemType != ValueType.UNKNOWN) {
             E.checkArgument(this.elemType == value.valueType(),
-                            "Invalid value '%s' with type %s, " +
+                    "Invalid value '%s' with type %s, " +
                             "expect element with type %s",
-                            value, value.valueType().string(),
-                            this.elemType.string());
+                    value, value.valueType().string(),
+                    this.elemType.string());
         } else {
             this.elemType = value.valueType();
         }
@@ -70,6 +70,10 @@ public class MapValue<T extends Value> implements Value {
 
     public T get(Id id) {
         return this.map.get(id);
+    }
+
+    public int size() {
+        return this.map.size();
     }
 
     public Set<Map.Entry<Id, T>> entrySet() {
@@ -87,9 +91,9 @@ public class MapValue<T extends Value> implements Value {
         this.checkAssign(other);
         ValueType elemType = ((MapValue<T>) other).elemType();
         E.checkArgument(elemType == this.elemType(),
-                        "Can't assign %s<%s> to %s<%s>",
-                        other.valueType().string(), elemType.string(),
-                        this.valueType().string(), this.elemType().string());
+                "Can't assign %s<%s> to %s<%s>",
+                other.valueType().string(), elemType.string(),
+                this.valueType().string(), this.elemType().string());
         this.map = ((MapValue<T>) other).map;
     }
 
@@ -118,7 +122,7 @@ public class MapValue<T extends Value> implements Value {
     }
 
     protected void read(RandomAccessInput in, boolean readElemType)
-                        throws IOException {
+            throws IOException {
         int size = in.readInt();
         if (readElemType) {
             this.elemType = SerialEnum.fromCode(ValueType.class, in.readByte());
@@ -141,7 +145,7 @@ public class MapValue<T extends Value> implements Value {
     }
 
     protected void write(RandomAccessOutput out, boolean writeElemType)
-                         throws IOException {
+            throws IOException {
         out.writeInt(this.map.size());
         if (writeElemType) {
             out.writeByte(this.elemType.code());
