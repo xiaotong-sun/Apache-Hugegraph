@@ -119,9 +119,11 @@ public class Scan implements Computation<ScanMessage> {
                 }
             }
 
-            // if this vertex is a core vertex(i.e. |epsNb| >= mu), send clusterID to its
-            // epsNb.
+            // if this vertex is a core vertex(i.e. |epsNb| >= mu), send clusterID to its epsNb.
+
             IdSet epsNeighbors = ((ScanValue) vertex.value()).epsNeighbors();
+            epsNeighbors.add(vertex.id());
+
             if (epsNeighbors.value().size() >= mu) {
                 for (Id targetId : epsNeighbors.value()) {
                     ScanMessage scanMessage = new ScanMessage(vertex.id(), null, 1);
@@ -131,7 +133,13 @@ public class Scan implements Computation<ScanMessage> {
             }
             return 0;
         } else { // superstep>2, Clustering
+            IdSet epsNeighbors = ((ScanValue) vertex.value()).epsNeighbors();
 
+            if (epsNeighbors.value().size() >= mu) {
+                for 
+            } else {
+                vertex.inactivate();
+            }
         }
         return null;
     }
